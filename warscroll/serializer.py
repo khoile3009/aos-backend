@@ -8,6 +8,7 @@ from warscroll.models import (
     Weapon,
     WeaponAbility,
 )
+from warscroll.utils import to_snake_case
 
 
 class KeywordSerializer(serializers.ModelSerializer):
@@ -65,6 +66,7 @@ class AbilitySerializer(serializers.ModelSerializer):
 
 
 class WarscrollSerializer(serializers.ModelSerializer):
+    id = serializers.SerializerMethodField()
     weapons = WeaponSerializer(many=True)
     abilities = AbilitySerializer(many=True)
     keywords = KeywordSerializer(many=True)
@@ -89,11 +91,17 @@ class WarscrollSerializer(serializers.ModelSerializer):
             "keywords",
         ]
 
+    def get_id(self, obj):
+        # Convert the name to snake_case and use it as id
+        return to_snake_case(obj.name)
+
     def create(self, validated_data):
         weapons = validated_data.pop("weapons")
         abilities = validated_data.pop("abilities")
         keywords = validated_data.pop("keywords")
-        warscroll = Warscroll.objects.create(**validated_data)
+        name = validated_data.get("name")
+        warscroll_id = to_snake_case(name)
+        warscroll = Warscroll.objects.create(id=warscroll_id, **validated_data)
 
         # Add Weapons
         for weapon in weapons:

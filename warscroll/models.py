@@ -4,6 +4,7 @@ from django.db import models
 
 
 class Warscroll(models.Model):
+    id = models.CharField(max_length=100, primary_key=True)
     created = models.DateTimeField(auto_now_add=True)
     name = models.CharField(max_length=100)
     wounds = models.IntegerField()
