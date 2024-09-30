@@ -2,6 +2,7 @@ from rest_framework import serializers
 
 from warscroll.models import (
     Ability,
+    AbilityKeyword,
     Keyword,
     Warscroll,
     Weapon,
@@ -18,6 +19,12 @@ class KeywordSerializer(serializers.ModelSerializer):
 class WeaponAbilitySerializer(serializers.ModelSerializer):
     class Meta:
         model = WeaponAbility
+        fields = ["name"]
+
+
+class AbilityKeywordSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AbilityKeyword
         fields = ["name"]
 
 
@@ -40,9 +47,21 @@ class WeaponSerializer(serializers.ModelSerializer):
 
 
 class AbilitySerializer(serializers.ModelSerializer):
+    keywords = AbilityKeywordSerializer(many=True)
+
     class Meta:
         model = Ability
-        fields = ["phase", "side", "phaseText", "text"]
+        fields = [
+            "phase",
+            "side",
+            "phaseText",
+            "name",
+            "declare",
+            "effect",
+            "lore",
+            "cost",
+            "keywords",
+        ]
 
 
 class WarscrollSerializer(serializers.ModelSerializer):
@@ -54,9 +73,7 @@ class WarscrollSerializer(serializers.ModelSerializer):
         model = Warscroll
         fields = [
             "id",
-            "prename",
             "name",
-            "postname",
             "wounds",
             "move",
             "control",
@@ -66,6 +83,7 @@ class WarscrollSerializer(serializers.ModelSerializer):
             "points",
             "numberOfModels",
             "description",
+            "notes",
             "weapons",
             "abilities",
             "keywords",
@@ -86,7 +104,10 @@ class WarscrollSerializer(serializers.ModelSerializer):
 
         # Add abilities
         for ability in abilities:
-            Ability.objects.create(warscroll=warscroll, **ability)
+            ability_keywords = ability.pop("keywords")
+            ability = Ability.objects.create(warscroll=warscroll, **ability)
+            for ability_keyword in ability_keywords:
+                AbilityKeyword.object.create(ability=ability, **ability_keyword)
 
         # Add keywords
         for keyword in keywords:

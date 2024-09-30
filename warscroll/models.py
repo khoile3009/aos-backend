@@ -5,9 +5,7 @@ from django.db import models
 
 class Warscroll(models.Model):
     created = models.DateTimeField(auto_now_add=True)
-    prename = models.CharField(max_length=100, null=True)
     name = models.CharField(max_length=100)
-    postname = models.CharField(max_length=100, null=True)
     wounds = models.IntegerField()
     move = models.IntegerField()
     control = models.IntegerField()
@@ -16,7 +14,8 @@ class Warscroll(models.Model):
     baseSize = models.IntegerField()
     points = models.IntegerField()
     numberOfModels = models.IntegerField()
-    description = models.TextField()
+    description = models.TextField(null=True)
+    notes = models.TextField(null=True)
 
 
 PHASE_CHOICES = [
@@ -41,7 +40,11 @@ class Ability(models.Model):
     phase = models.CharField(choices=PHASE_CHOICES, max_length=10)
     side = models.CharField(choices=SIDE_CHOICES, max_length=5)
     phaseText = models.TextField()
-    text = models.TextField()
+    name = models.CharField(max_length=100)
+    declare = models.TextField(null=True)
+    effect = models.TextField()
+    lore = models.TextField(null=True)
+    cost = models.IntegerField(null=True)
 
 
 class Weapon(models.Model):
@@ -68,5 +71,12 @@ class Keyword(models.Model):
 class WeaponAbility(models.Model):
     weapon = models.ForeignKey(
         Weapon, related_name="abilities", on_delete=models.CASCADE
+    )
+    name = models.CharField(max_length=30)
+
+
+class AbilityKeyword(models.Model):
+    ability = models.ForeignKey(
+        Ability, related_name="keywords", on_delete=models.CASCADE
     )
     name = models.CharField(max_length=30)
